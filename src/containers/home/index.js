@@ -7,8 +7,9 @@ import {
   incrementAsync,
   decrement,
   decrementAsync
-} from '../../reducers/counter'
+} from '../../actions'
 
+// This is a component.
 const Home = props => (
   <div>
     <h1>Hello</h1>
@@ -27,12 +28,14 @@ const Home = props => (
   </div>
 )
 
+// This one is easy because names are same.
 const mapStateToProps = state => ({
   count: state.counter.count,
   isIncrementing: state.counter.isIncrementing,
   isDecrementing: state.counter.isDecrementing
 })
 
+// Feeds the actions into the props!
 const mapDispatchToProps = dispatch => bindActionCreators({
   increment,
   incrementAsync,
@@ -41,6 +44,7 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   changePage: () => push('/about-us')
 }, dispatch)
 
+// Exports a connected component.
 export default connect(
   mapStateToProps,
   mapDispatchToProps
