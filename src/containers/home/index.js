@@ -8,23 +8,12 @@ import {
   decrement,
   decrementAsync
 } from '../../actions'
+import HomePanel from '../../components/home-panel';
 
 // This is a component.
 const Home = props => (
   <div>
-    <h1>Hello</h1>
-    <p>Count: {props.count}</p>
-
-    <p>
-      <button onClick={props.increment} disabled={props.isIncrementing}>Increment</button>
-      <button onClick={props.incrementAsync} disabled={props.isIncrementing}>Increment Async</button>
-    </p>
-
-    <p>
-      <button onClick={props.decrement} disabled={props.isDecrementing}>Decrementing</button>
-      <button onClick={props.decrementAsync} disabled={props.isDecrementing}>Decrement Async</button>
-    </p>
-
+    <HomePanel mappedProps={props} />
   </div>
 )
 
