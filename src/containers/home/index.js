@@ -11,7 +11,7 @@ import {
 
 const Home = props => (
   <div>
-    <h1>Home</h1>
+    <h1>Hello</h1>
     <p>Count: {props.count}</p>
 
     <p>
@@ -24,7 +24,6 @@ const Home = props => (
       <button onClick={props.decrementAsync} disabled={props.isDecrementing}>Decrement Async</button>
     </p>
 
-    <p><button onClick={() => props.changePage()}>Go to about page via redux</button></p>
   </div>
 )
 
