@@ -1,0 +1,297 @@
+recipe
+
+
+github.com
+bptremblay
+Cruftfall3n
+
+
+
+npm install -g create-react-app XYZ
+cd XYZ
+npm install
+
+npm install --save redux react-redux react-router-dom react-router-redux@next redux-thunk
+
+npm install --save react-bootstrap
+    (download bootstrap ~3.3.7)
+http://getbootstrap.com/docs/3.3/getting-started/#download
+    (copy to public, should be bootstrap/css, bootstrap/fonts)
+    (include in index.html 
+      <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="%PUBLIC_URL%/bootstrap/css/bootstrap.min.css">
+
+        <!-- Optional theme -->
+        <link rel="stylesheet" href="%PUBLIC_URL%/bootstrap/css/bootstrap-theme.min.css">
+    )
+
+////////////////////////////////////////////////
+Create/configure store.js
+    (import { createStore, applyMiddleware, compose } from 'redux’;
+    import thunk from 'redux-thunk’;
+    import rootReducer from './reducers’;
+
+
+    const initialState = {};
+    const enhancers = [];
+    const middleware = [
+      thunk
+    ];
+
+    if (process.env.NODE_ENV === 'development') {
+      const devToolsExtension = window.devToolsExtension
+
+      if (typeof devToolsExtension === 'function') {
+        enhancers.push(devToolsExtension());
+      }
+    };
+
+    const composedEnhancers = compose(
+      applyMiddleware(...middleware),
+      ...enhancers
+    );
+
+    const store = createStore(
+      rootReducer,
+      initialState,
+      composedEnhancers
+    );
+
+    export default store;
+)
+
+////////////////////////////////////////////////
+Configure index.js
+    (import React from 'react’;
+    import { render } from 'react-dom’;
+    import { Provider } from 'react-redux’;
+    import store from './store’;
+    import App from './containers/app’;
+
+    //import 'sanitize.css/sanitize.css'
+    import './index.css’;
+
+    const target = document.querySelector('#root’);
+
+    render(
+      <Provider store={store}>
+          <div>
+            <App />
+          </div>
+      </Provider>,
+      target
+    );
+    )
+////////////////////////////////////////////////
+Configure containers/app/index.js
+    (import React from 'react';
+    import Home from '../home’;
+
+    const App = () => (
+      <div>
+        <Home />
+      </div>
+    );
+
+    export default App;
+    )
+////////////////////////////////////////////////
+Configure containers/home/index.js
+    (import React from 'react’;
+    import { push } from 'react-router-redux’;
+    import { bindActionCreators } from 'redux’;
+    import { connect } from 'react-redux’;
+    import {
+      increment,
+      incrementAsync,
+      decrement,
+      decrementAsync
+    } from '../../actions’;
+    import HomePanel from '../../components/home-panel';
+
+    // This is a component.
+    const Home = props => (
+      <div>
+        <HomePanel mappedProps={props} />
+      </div>
+    );
+
+    // This one is easy because names are same.
+    const mapStateToProps = state => ({
+      count: state.counter.count,
+      isIncrementing: state.counter.isIncrementing,
+      isDecrementing: state.counter.isDecrementing
+    });
+
+    // Feeds the actions into the props!
+    const mapDispatchToProps = dispatch => bindActionCreators({
+      increment,
+      incrementAsync,
+      decrement,
+      decrementAsync,
+      changePage: () => push('/about-us')
+    }, dispatch);
+
+    // Exports a connected component.
+    export default connect(
+      mapStateToProps,
+      mapDispatchToProps
+    )(Home);
+    )
+////////////////////////////////////////////////
+Create /actions as single file, externalize constants using export
+    (import * as types from './action-types';
+
+    const delay = 1000;
+
+    export const increment = () => {
+      return dispatch => {
+        dispatch({
+          type: types.INCREMENT_REQUESTED
+        });
+
+        dispatch({
+          type: types.INCREMENT
+        });
+      };
+    };
+
+    export const incrementAsync = () => {
+      return dispatch => {
+        dispatch({
+          type: types.INCREMENT_REQUESTED
+        });
+
+        return setTimeout(() => {
+          dispatch({
+            type: types.INCREMENT
+          })
+        }, delay);
+      };
+    };
+
+    export const decrement = () => {
+      return dispatch => {
+        dispatch({
+          type: types.DECREMENT_REQUESTED
+        });
+
+        dispatch({
+          type: types.DECREMENT
+        });
+      };
+    };
+
+    export const decrementAsync = () => {
+      return dispatch => {
+        dispatch({
+          type: types.DECREMENT_REQUESTED
+        });
+
+        return setTimeout(() => {
+          dispatch({
+            type: types.DECREMENT
+          })
+        }, delay);
+      };
+    };
+    )
+////////////////////////////////////////////////
+    (export const INCREMENT_REQUESTED = 'counter/INCREMENT_REQUESTED’;
+    export const INCREMENT = 'counter/INCREMENT’;
+    export const DECREMENT_REQUESTED = 'counter/DECREMENT_REQUESTED’;
+    export const DECREMENT = 'counter/DECREMENT’);
+////////////////////////////////////////////////
+Create /components with at least one dumb component
+    (import React from 'react';
+    import './home-panel.css';
+    import {Button, Panel} from 'react-bootstrap';
+
+
+    class HomePanel extends React.Component {
+
+
+      constructor(props) {
+        super(props);
+      }
+
+
+      render() {
+        return (
+            <Panel>
+                <h1>Hello</h1>
+                <p>Count: {this.props.mappedProps.count}</p>
+
+                <p>
+                  <Button onClick={this.props.mappedProps.increment} disabled={this.props.mappedProps.isIncrementing}>Increment</Button>
+                  <Button onClick={this.props.mappedProps.incrementAsync} disabled={this.props.mappedProps.isIncrementing}>Increment Async</Button>
+                </p>
+
+                <p>
+                  <Button onClick={this.props.mappedProps.decrement} disabled={this.props.mappedProps.isDecrementing}>Decrementing</Button>
+                  <Button onClick={this.props.mappedProps.decrementAsync} disabled={this.props.mappedProps.isDecrementing}>Decrement Async</Button>
+                </p>
+            </Panel>
+        );
+      }
+    }
+
+    export default HomePanel;)
+
+
+
+////////////////////////////////////////////////
+Create /reducers/index.js
+    (import { combineReducers } from 'redux’;
+    import { routerReducer } from 'react-router-redux’;
+    import counter from './counter’;
+
+    export default combineReducers({
+      router: routerReducer,
+      counter
+    });
+    )
+////////////////////////////////////////////////
+Create /reducers/counter.js
+    (import * as types from '../actions/action-types';
+
+    const initialState = {
+      count: 0,
+      isIncrementing: false,
+      isDecrementing: false
+    };
+
+    export default (state = initialState, action) => {
+      switch (action.type) {
+        case types.INCREMENT_REQUESTED:
+          return {
+            ...state,
+            isIncrementing: true
+          };
+
+        case types.INCREMENT:
+          return {
+            ...state,
+            count: state.count + 1,
+            isIncrementing: !state.isIncrementing
+          };
+
+        case types.DECREMENT_REQUESTED:
+          return {
+            ...state,
+            isDecrementing: true
+          };
+
+        case types.DECREMENT:
+          return {
+            ...state,
+            count: state.count - 1,
+            isDecrementing: !state.isDecrementing
+          };
+
+        default:
+          return state;
+      }
+    };
+
+    )
